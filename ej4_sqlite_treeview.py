@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter.messagebox import *
 import sqlite3 #Aca nos conectamos a una base de datos de tipo SQL llamado sqlite3 (lo usamos porque ya viene con python y no hay que instalar nada adicional
+               #La bas de datos sqlite3 por defecto crea una columna llamada id en donde lo valores son autoincrementales, es decir que no lo teng que generar yo,
+               #sino que la base de datos ya lo genera
 from tkinter import ttk
 import re
 # ##############################################
@@ -34,18 +36,29 @@ try:
     crear_tabla() #aca voy a llamar a la funcion crear_producto
 except:
     print("Hay un error")
-	
+
+#
 def alta(producto, cantidad, precio, tree):
  
     print(producto, cantidad, precio)
+    
+    #en los otros ejercicios de clases, la diferencia es que abriamos la lista/diccionario, guardamos los datos en esa lista/diccionario y avisabamos que se realizo correctamente
+    #es decir que antes, cuando usabamos un diccionario para guardar la informacion el codigo quedaba asi:
+    #compra[el_id] = {'producto': producto, 'cantidad': cantidad, 'precio': precio}
+    #el_id += 1
+    #print("estoy en alta")
     con=conexion()
     cursor=con.cursor()
-    data=(producto, cantidad, precio)
+    data=(producto.get(), cantidad, precio)
     sql="INSERT INTO productos(producto, cantidad, precio) VALUES(?, ?, ?)"
     cursor.execute(sql, data)
     con.commit()
+    producto.set("---")#con esto, cuando hago un alta, en la interfaz se va a ver "---"
+    
     print("Estoy en alta todo ok")
-    actualizar_treeview(tree)
+    actualizar_treeview(tree) #con a la informacion no la voy a mostrar en consola, sino que voy a usar una interfaz grafica, voy a usar un tree view, pero
+                              #la logica es la misma.
+                              #cuando trabajamos con una interfaz a la informaicon no la tomamos con un "input", sino que usamos un "entry"
 
 def borrar(tree):
     valor = tree.selection()
@@ -96,9 +109,13 @@ precio=Label(root, text="Precio")
 precio.grid(row=3, column=0, sticky=W)
 
 # Defino variables para tomar valores de campos de entrada
-a_val, b_val, c_val = StringVar(), DoubleVar(), DoubleVar()
+a_val, b_val, c_val = StringVar(), DoubleVar(), DoubleVar() # aca le pasamos que tipo de informacion va a guarda.
+                                                            #StringVar() es una variable de tkinter, no de python, y esto es como una caja dentro de la cual puede ir
+                                                            #texto. Para obtener ese texto y sacarlo de ahi tengo que hacer un .get() sobre ese StringVar()
 w_ancho = 20
 
+#con el Entry se envian los parametros a la aplicacion, la forma correcta de hacerlo es definiendo la entrada correcta de texto y asociando una variable (ej: a_val
+# va con entrada1, b_val va con entrada2 y asi)
 entrada1 = Entry(root, textvariable = a_val, width = w_ancho) 
 entrada1.grid(row = 1, column = 1)
 entrada2 = Entry(root, textvariable = b_val, width = w_ancho) 
@@ -120,7 +137,9 @@ tree.heading("col2", text="cantidad")
 tree.heading("col3", text="precio")
 tree.grid(row=10, column=0, columnspan=4)
 
-boton_alta=Button(root, text="Alta", command=lambda:alta(a_val.get(), b_val.get(), c_val.get(), tree))
+#para pasar parametros, la informacion se manda mediante una funcion lambda, 
+boton_alta=Button(root, text="Alta", command=lambda:alta(a_val.get(), b_val.get(), c_val.get(), tree)) #aca estoy haciendo el .get() de a_val, es decir de cada StringVar()
+#si quisiera enviar un dato para modificar el contenido de esa caja "StringVar()" tengo que hacerlo con un .set()
 boton_alta.grid(row=6, column=1)
 
 boton_borrar=Button(root, text="Borrar", command=lambda:borrar(tree))
